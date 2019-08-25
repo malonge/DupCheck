@@ -10,7 +10,10 @@ associated with increased short read coverage.
 
 2. Get coverage
 
-`$ bedtools coverage -abam alns.bam -b bins.bed`
+`$ bedtools coverage -abam alns.bam -b index.bed > index.cov.bed`
+
+3. GC correct coverage
+`$ python3 dc_gccorr.py index.cov.bed > index.cov.corr.bed`
 
 3. Validate dups
 `$ python3 dc_validate.py`
