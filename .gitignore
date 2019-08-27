@@ -1,3 +1,5 @@
 .idea
 *.fasta
 *.bed
+*.ipynb
+.ipynb_checkpoints

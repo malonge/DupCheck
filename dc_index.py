@@ -22,8 +22,8 @@ def main():
         seq_lens[header] = len(seq)
 
         for i in range(0, seq_lens[header], bin_size):
-            if i%1000000 == 0:
-                log("Processed %r bp" %i)
+            if i % 1000000 == 0:
+                log("Processed %r bp for %s" %(i, header))
 
             this_line = (header, i, i+bin_size, int(gc_content(seq[i:i + bin_size])*100))
             all_bed_intervals.append(this_line)
