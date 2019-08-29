@@ -1,12 +1,11 @@
 import time
+import sys
 
 
 def log(message):
-    """ Log messages to standard output. """
-    print (time.ctime() + ' --- ' + message, flush=True)
-
-
-
+    """ Log messages to standard error. """
+    sys.stderr.write(time.ctime() + ' --- ' + message + "\n")
+    sys.stderr.flush()
 
 
 def gc_content(s):

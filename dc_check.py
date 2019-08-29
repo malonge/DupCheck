@@ -5,11 +5,25 @@ import argparse
 import numpy as np
 from scipy import stats
 
+from dupcheck_utilities.utilities import log
 
-def fit_gaussian(cov_dict, trim=0):
+
+def remove_iqr_outliers(x):
+    """ From https://medium.com/datadriveninvestor/finding-outliers-in-dataset-using-python-efc3fce6ce32"""
+    x = sorted(x)
+    q1, q3 = np.percentile(x,[25,75])
+    iqr = q3 - q1
+    lower_bound = q1 - (1.5 * iqr)
+    upper_bound = q3 + (1.5 * iqr)
+    x = x[x > lower_bound]
+    return x[x < upper_bound]
+
+
+def fit_gaussian(cov_dict):
     """ Fit a gaussian distribution to the coverage across bins genome-wide. """
-    # Later will trim off outliers
-    return stats.norm.fit(np.asarray(list(cov_dict.values())).flatten())
+    x = np.asarray(list(cov_dict.values())).flatten()
+    x = remove_iqr_outliers(x)
+    return stats.norm.fit(x)
 
 
 def get_adj_dup_len(dup_len, bin_size):
@@ -53,7 +67,9 @@ def main():
         chr_covs[i] = np.asarray(chr_covs[i], dtype=np.int32)
 
     # Get the average coverage across the initial bins
+    log("Calculating global average coverage.")
     glob_mean, glob_std = fit_gaussian(chr_covs)
+    log("After removing outliers, the global average coverage is {} X.".format(glob_mean))
 
     # Process each line of the vcf file. If its a comment or non dup, just print it.
     with open(vcf_file, "r") as f:
@@ -65,7 +81,8 @@ def main():
                 fields = line.split("\t")
                 sv_type = ''
                 sv_len = 0
-                for tag in fields[8]:
+                tags = fields[7].split(";")
+                for tag in tags:
                     if tag.startswith("SVTYPE="):
                         sv_type = tag[7:]
                     if tag.startswith("SVLEN="):
@@ -82,36 +99,41 @@ def main():
                     dup_end = dup_start + sv_len
                     dup_len = sv_len
                     cov_arr = chr_covs[dup_header]
-    
+                    log("Processing a DUP at {}:{}-{}.".format(dup_header, dup_start, dup_end))
+
                     # Get the adjusted dup length which is as close to the real dup length as possible
                     # but divisible by the bin size.
                     adj_dup_len = get_adj_dup_len(dup_len, bin_size)
-                    print(dup_len, adj_dup_len)
+                    len_diff = abs(dup_len - adj_dup_len)
+                    log("The original DUP length is {} and the DUP bin size is {}.".format(dup_len, adj_dup_len))
+                    log("The difference in length is {} bp".format(len_diff))
 
                     # Decide how many windows we should shave off the start to get close to the
                     # real starting point.
                     lop_size = get_lop_size(dup_start, adj_dup_len, bin_size)
-                    print("lop_size = %r" % lop_size)
 
                     # Lop off the required number of bins
                     lop_cov_arr = cov_arr[lop_size:]
 
                     # Merge bins into the necessary adjusted dup size
                     factor = adj_dup_len//bin_size
-                    print("loped coverage array has length= %r" %(len(lop_cov_arr)))
 
                     # Truncate the coverage array so that it is divisible by the factor
                     trunc_cov_arr = lop_cov_arr[:(len(lop_cov_arr)//factor)*factor]
                     cov_mat = trunc_cov_arr.reshape(len(trunc_cov_arr)//factor, factor)
                     merged_cov_arr = np.average(cov_mat, axis=1)
-                    print(len(trunc_cov_arr), len(merged_cov_arr))
+                    dup_coverage = merged_cov_arr[dup_start//adj_dup_len]
 
                     # Now our coverage is merged and aligned. Let's see the coverage of our duplication window
-                    print("DUP bin coverage = %f" %(merged_cov_arr[dup_start//adj_dup_len]))
+                    log("The DUP bin coverage = {}".format(dup_coverage))
 
                     # And the coverage of all of the bins that size
-                    print("average coverage of original bins = %f" % glob_mean)
-                    print("\n\nmoving on, and getting over\n\n")
+                    log("This DUP is {}X the average coverage.".format((dup_coverage/glob_mean)))
+                    if dup_coverage/glob_mean > 1.75:
+                        print(line)
+                        log("Keeping DUP.")
+                    else:
+                        log("Discarding DUP.")
 
 
 if __name__ == "__main__":
