@@ -10,7 +10,7 @@ from dupcheck_utilities.utilities import log
 
 def remove_iqr_outliers(x):
     """ From https://medium.com/datadriveninvestor/finding-outliers-in-dataset-using-python-efc3fce6ce32"""
-    x = sorted(x)
+    x = np.sort(x)
     q1, q3 = np.percentile(x,[25,75])
     iqr = q3 - q1
     lower_bound = q1 - (1.5 * iqr)
@@ -21,7 +21,7 @@ def remove_iqr_outliers(x):
 
 def fit_gaussian(cov_dict):
     """ Fit a gaussian distribution to the coverage across bins genome-wide. """
-    x = np.asarray(list(cov_dict.values())).flatten()
+    x = np.concatenate(list(cov_dict.values()))
     x = remove_iqr_outliers(x)
     return stats.norm.fit(x)
 
@@ -55,6 +55,7 @@ def main():
     bin_size = 200
 
     # Read the coverage file
+    log("Reading {}".format(cov_file))
     chr_covs = dict()
     with open(cov_file, "r") as f:
         for line in f:
@@ -98,6 +99,9 @@ def main():
                     dup_start = int(fields[1])
                     dup_end = dup_start + sv_len
                     dup_len = sv_len
+                    if dup_len < 1000:
+                        continue
+
                     cov_arr = chr_covs[dup_header]
                     log("Processing a DUP at {}:{}-{}.".format(dup_header, dup_start, dup_end))
 
