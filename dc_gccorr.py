@@ -41,7 +41,10 @@ def main():
     with open(bed_file, "r") as f:
         for line in f:
             bed_fields = line.rstrip().split("\t")
-            bed_fields.append(str(int(bed_fields[4]) * (bin_avg/gc_avg[int(bed_fields[3])])))
+            if not gc_avg[int(bed_fields[3])]:
+                bed_fields.append("0.0")
+            else:
+                bed_fields.append(str(int(bed_fields[4]) * (bin_avg/gc_avg[int(bed_fields[3])])))
             print("\t".join(bed_fields))
 
 
