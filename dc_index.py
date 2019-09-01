@@ -25,7 +25,7 @@ def main():
             if i % 1000000 == 0:
                 log("Processed %r bp for %s" %(i, header))
 
-            this_line = (header, i, i+bin_size, int(gc_content(seq[i:i + bin_size])*100))
+            this_line = (header, i, i+bin_size, int(round(gc_content(seq[i:i + bin_size])*100)))
             all_bed_intervals.append(this_line)
 
         # Remove the last bin if it is not complete
