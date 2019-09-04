@@ -7,7 +7,7 @@ associated with increased short read coverage.
 1. Index
 
 ```
-$ python3 dc_index.py reference.fasta -b <bin_size>
+$ python3 dc_index.py reference.fasta -b 200
 ```
 
 2. Get coverage
@@ -21,7 +21,7 @@ $ sort -k1,1 -k2,2n -k3,3n index.cov.bed > index.cov.srt.bed
 $ python3 dc_gccorr.py index.cov.srt.bed > index.cov.corr.bed
 ```
 
-3. Validate dups
+4. Validate dups
 ```
 $ python3 dc_check.py vars.vcf index.cov.corr.bed
 ```
