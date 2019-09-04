@@ -7,7 +7,7 @@ associated with increased short read coverage.
 1. Index
 
 ```
-$ python3 dc_index.py reference.fasta -b <bin_size>`
+$ python3 dc_index.py reference.fasta -b <bin_size>
 ```
 
 2. Get coverage
