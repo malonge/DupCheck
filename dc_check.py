@@ -81,7 +81,7 @@ def main():
             else:
                 fields = line.split("\t")
                 sv_type = ''
-                sv_len = 0
+                sv_len = None
                 tags = fields[7].split(";")
                 for tag in tags:
                     if tag.startswith("SVTYPE="):
@@ -90,7 +90,7 @@ def main():
                         sv_len = int(tag[6:])
 
                 assert sv_type
-                assert sv_len
+                assert sv_len is not None
                 if sv_type != "DUP":
                     print(line)
                 else:
