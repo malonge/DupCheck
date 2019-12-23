@@ -126,7 +126,12 @@ def main():
                     trunc_cov_arr = lop_cov_arr[:(len(lop_cov_arr)//factor)*factor]
                     cov_mat = trunc_cov_arr.reshape(len(trunc_cov_arr)//factor, factor)
                     merged_cov_arr = np.average(cov_mat, axis=1)
-                    dup_coverage = merged_cov_arr[dup_start//adj_dup_len]
+                    try:
+                        dup_coverage = merged_cov_arr[dup_start//adj_dup_len]
+                    except IndexError:
+                        # We have extended past the boundary
+                        log("Extended past boundary. Discarding")
+                        continue
 
                     # Now our coverage is merged and aligned. Let's see the coverage of our duplication window
                     log("The DUP bin coverage = {}".format(dup_coverage))
