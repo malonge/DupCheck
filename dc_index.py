@@ -6,7 +6,7 @@ from dupcheck_utilities.SeqReader import SeqReader
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Creat and index for validating dups')
+    parser = argparse.ArgumentParser(description='Create an index for validating dups')
     parser.add_argument("reference", metavar="<in.fasta>", type=str, help="Reference genome in fasta format.")
     parser.add_argument("-b", metavar="<bin_size>", type=int, help="Bin size")
 
