@@ -3,8 +3,8 @@
 Given a vcf file and a short-read alignment bam file, identify duplications
 associated with increased short read coverage.
 
-This work is a part of a larger panSV-genome analysis that is currently unpublished. This code is written expressly for 
-this analysis, and will not be updated or maintained for future use.
+This work is a part of a larger panSV-genome analysis. The code is written expressly for 
+that analysis, and will not be updated or maintained for future use.
 
 ## Dependencies
 - python3
